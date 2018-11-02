@@ -1,0 +1,28 @@
+{
+  "name": "express-mongoose-rest-api",
+  "version": "0.0.1",
+  "description": "REST API server powered by Express/MongoDB with user authentication via JWT",
+  "main": "index.js",
+  "repository": "https://github.com/arthurkao/express-mongoose-rest-api.git",
+  "author": "Arthur C. Kao <arthurckao@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
+    "cors": "^2.8.4",
+    "debug": "^4.1.0",
+    "dotenv": "^6.1.0",
+    "express": "^4.16.4",
+    "helmet": "^3.14.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^5.3.8",
+    "morgan": "^1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.5"
+  },
+  "scripts": {
+    "start": "nodemon -r dotenv/config index.js"
+  }
+}
