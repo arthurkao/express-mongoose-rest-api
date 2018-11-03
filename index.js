@@ -1,18 +1,27 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const _debug = require('debug');
 
 const debug = _debug('init');
-const app = express();
 const PORT = process.env.PORT || 3000;
+const serverUtil = require('./setup/express');
+const dbUtil = require('./setup/mongoose');
 
-//***** setup express server *****
-require('./setup/express')(app);
+const app = express();
 
-//***** setup MongoDB connection *****
-require('./setup/mongoose')(app).then(() => {
-  //***** setup api routes *****
-  app.get('/', (req, res) => res.send('Hello World!'));
+//***** setup mongoose *****
+dbUtil.setup(mongoose);
 
-  app.listen(PORT, () => debug('express server listening on port ' + PORT));
-}).catch((err) => debug('error establishing mongodb connection'));
+//***** connect mongodb *****
+dbUtil.connect(mongoose)
+  .then((connectedDB) => {
+    // ***** bring up express *****
+    serverUtil.middleWare(app, connectedDB);
+    serverUtil.routes(app);
+    app.listen(PORT, () => debug('express server listening on port ' + PORT));
+  }, (err) => debug('error establishing mongodb connection'))
+  .catch(() => debug('error establishing express api server'));
+
+
+
 
