@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
+const timestamp = require('mongoose-timestamp');
 const _debug = require('debug');
+
 const debug = _debug('setup:mongoose');
 module.exports = function(app){
   const mongoURI = 'mongodb://' + process.env.DB_HOST + ':' + process.env.DB_PORT;
@@ -21,6 +23,8 @@ module.exports = function(app){
     family: 4 // Use IPv4, skip trying IPv6
   };
   debug('create mongoose connection');
+  mongoose.Promise = global.Promise;
+  mongoose.plugin(timestamp);
   app.db = mongoose.createConnection(mongoURI, options);
   return app.db.then(() => debug('established mongodb connection'));
 };
