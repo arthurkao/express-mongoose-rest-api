@@ -19,6 +19,7 @@ dbUtil.connect(mongoose)
     app.locals.db = connectedDB;
     serverUtil.middleWare(app);
     serverUtil.routes(app);
+    serverUtil.errorHandlers(app);
     app.listen(PORT, () => debug('express server listening on port ' + PORT));
   }, (err) => debug('error establishing mongodb connection'))
   .catch(() => debug('error establishing express api server'));

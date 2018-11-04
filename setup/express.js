@@ -5,12 +5,13 @@ const compress = require('compression');
 const methodOverride = require('method-override');
 const helmet = require('helmet');
 const cors = require('cors');
+const Boom = require('boom');
 
 const debug = _debug('setup:express');
 const route = require('../route');
 module.exports = {
   middleWare: (app) => {
-    debug('setup express middleware');
+    debug('setup middleware');
     app.use(morgan('dev', {
       skip: function (req, res) {
         return res.statusCode < 400
@@ -34,16 +35,37 @@ module.exports = {
     // enable CORS - Cross Origin Resource Sharing
     app.use(cors());
 
-    //add db connection ref to req
+    //append db connection ref to req
     app.use((req, res, next) => {
       req.db = req.app.locals.db;
       next();
-    })
+    });
   },
   routes: (app) => {
-    debug('setup express routes');
+    debug('setup routes');
+    // setup /api routes
     app.use('/api', route);
+
+    // setup other (static) routes
     app.get('/', (req, res) => res.send('Express-Mongoose-Rest-Api'));
 
+  },
+  errorHandlers: (app) => {
+    debug('setup custom error handlers');
+    // boom error handler
+    app.use((err, req, res, next) => {
+      const debug = _debug('app:error');
+      debug('boom error handler invoked');
+      if(Boom.isBoom(err)){
+        debug('handling boom error...');
+        if (err.isServer) {
+          // log the error...
+          debug('err.message: ', err.message);
+        }
+        return res.status(err.output.statusCode).json(err.output.payload);
+      }
+      // let default error handler manage other non-api errors
+      return next(err);
+    })
   }
 };

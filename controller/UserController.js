@@ -1,9 +1,7 @@
 const _debug = require('debug');
 const debug = _debug('controller:user');
-const mongoose = require('mongoose');
+const Boom = require('boom');
 
-//TODO: error handling middleware
-//TODO: refactor reuse CRUD code in controller
 //TODO: crud test case
 //TODO: http args validation (joi)
 //TODO: api doc swagger like
@@ -18,37 +16,31 @@ module.exports = {
   /**
    * UserController.list()
    */
-  list: function (req, res) {
+  list: function (req, res, next) {
     debug('list invoked');
-    req.db.model('User').find(function (err, Users) {
+    req.db.model('User').find(function (err, users) {
       if (err) {
-        debug('error finding user model');
-        return res.status(500).json({
-          message: 'Error when getting User.',
-          error: err
-        });
+        const msg = 'MongoError when finding users';
+        return next(Boom.internal(msg, err));
       }
-      return res.json(Users);
+      return res.json(users);
     });
   },
 
   /**
    * UserController.show()
    */
-  show: function (req, res) {
+  show: function (req, res, next) {
     var id = req.params.id;
     debug('show invoked with id: ', id);
     req.db.model('User').findOne({_id: id}, function (err, user) {
       if (err) {
-        return res.status(500).json({
-          message: 'Error when getting User.',
-          error: err
-        });
+        const msg = 'MongoError when finding user: ' + id;
+        debug(msg);
+        return next(Boom.internal(msg, err));
       }
       if (!user) {
-        return res.status(404).json({
-          message: 'No such User'
-        });
+        return next(Boom.notFound('User not found'));
       }
       return res.json(user);
     });
@@ -57,7 +49,7 @@ module.exports = {
   /**
    * UserController.create()
    */
-  create: function (req, res) {
+  create: function (req, res, next) {
     debug('create invoked');
     const user = req.db.model('User')({
       username : req.body.username,
@@ -66,35 +58,29 @@ module.exports = {
 
     });
     debug('attempt to save new User');
-    user.save(function (err, User) {
+    user.save(function (err, savedUser) {
       if (err) {
-        debug('error saving new User');
-        return res.status(500).json({
-          message: 'Error when creating User',
-          error: err
-        });
+        const msg = 'MongoError when creating user';
+        debug(msg);
+        return next(Boom.internal(msg, err));
       }
-      return res.status(201).json(User);
+      return res.status(201).json(savedUser);
     });
   },
 
   /**
    * UserController.update()
    */
-  update: function (req, res) {
+  update: function (req, res, next) {
     var id = req.params.id;
     debug('update invoked with id: ', id);
     req.db.model('User').findOne({_id: id}, function (err, user) {
       if (err) {
-        return res.status(500).json({
-          message: 'Error when getting User',
-          error: err
-        });
+        const msg = 'MongoError when getting user';
+        return next(Boom.internal(msg, err));
       }
       if (!user) {
-        return res.status(404).json({
-          message: 'No such User'
-        });
+        return next(Boom.notFound('User not found'));
       }
       user.username = req.body.username ? req.body.username : user.username;
       user.password = req.body.password ? req.body.password : user.password;
@@ -102,10 +88,7 @@ module.exports = {
 
       user.save(function (err, user) {
         if (err) {
-          return res.status(500).json({
-            message: 'Error when updating User.',
-            error: err
-          });
+          return next(Boom.internal('MongoError when updating user', err));
         }
 
         return res.json(user);
@@ -116,15 +99,13 @@ module.exports = {
   /**
    * UserController.remove()
    */
-  remove: function (req, res) {
+  remove: function (req, res, next) {
     var id = req.params.id;
     debug('remove invoked with id: ', id);
     req.db.model('User').findByIdAndRemove(id, function (err, user) {
       if (err) {
-        return res.status(500).json({
-          message: 'Error when deleting the User.',
-          error: err
-        });
+        const msg = 'MongoError when deleting user';
+        return next(Boom.internal(msg, err));
       }
       return res.status(204).json();
     });
