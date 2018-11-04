@@ -9,7 +9,7 @@ const cors = require('cors');
 const debug = _debug('setup:express');
 const route = require('../route');
 module.exports = {
-  middleWare: (app, db) => {
+  middleWare: (app) => {
     debug('setup express middleware');
     app.use(morgan('dev', {
       skip: function (req, res) {
@@ -36,7 +36,7 @@ module.exports = {
 
     //add db connection ref to req
     app.use((req, res, next) => {
-      req.db = db;
+      req.db = req.app.locals.db;
       next();
     })
   },

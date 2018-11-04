@@ -3,10 +3,10 @@ const debug = _debug('controller:user');
 const mongoose = require('mongoose');
 
 //TODO: error handling middleware
-//TODO: DI mongoose model into route handler (instead of req.db.model())
 //TODO: refactor reuse CRUD code in controller
-//TODO: api doc swagger like
 //TODO: crud test case
+//TODO: http args validation (joi)
+//TODO: api doc swagger like
 //TODO: login logout signup (JWT token)
 /**
  * UserController.js
