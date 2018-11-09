@@ -1,6 +1,7 @@
 const timestamp = require('mongoose-timestamp');
 const _debug = require('debug');
 const mongoose = require('mongoose');
+const loadModels = require('../schema');
 
 const debug = _debug('setup:mongoose');
 const mongoURI = 'mongodb://' + process.env.DB_HOST + ':' + process.env.DB_PORT;
@@ -20,9 +21,6 @@ const options = {
   socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
   family: 4 // Use IPv4, skip trying IPv6
 };
-const UserSchema = require('../schema/UserModel');
-
-
 
 const  connect = () => {
     debug('connecting to mongodb...');
@@ -39,9 +37,7 @@ const  setup = () => {
     debug('registering global plug-in...');
     mongoose.plugin(timestamp);
     debug('registering mongoose models...');
-    //TODO: move the logic to schema/index.js
-    mongoose.model('User', UserSchema);
-    debug('all models are registered');
+    loadModels();
   };
 
 module.exports = {

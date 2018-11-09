@@ -5,12 +5,9 @@ const Boom = require('boom');
 const db = require('mongoose');
 const { UserService } = require('../service');
 
-// Controller (express route handler):
 // TODO 1. validate params and args with joi,
 // TODO 2. call Services(MODEL) to full fill the REST request
 // TODO 3. setup http status code and call res.send(...)
-// Is the interface between http (outer facing) API and data service (inner facing) API
-// Controller: implement User related API business logic w/o DB access
 //TODO: crud test case
 //TODO: User login logout signup (JWT token)
 /**

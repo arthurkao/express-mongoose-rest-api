@@ -2,7 +2,7 @@ const express = require('express');
 const Boom = require('boom');
 const router = express.Router();
 
-const UserController = require('../controller/UserController.js');
+const { UserController } = require('../controller');
 //TODO /api doc (swagger)
 
 // pass req, res objects on to controller function (returns promise)
