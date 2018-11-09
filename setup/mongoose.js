@@ -1,5 +1,6 @@
 const timestamp = require('mongoose-timestamp');
 const _debug = require('debug');
+const mongoose = require('mongoose');
 
 const debug = _debug('setup:mongoose');
 const mongoURI = 'mongodb://' + process.env.DB_HOST + ':' + process.env.DB_PORT;
@@ -21,21 +22,32 @@ const options = {
 };
 const UserSchema = require('../schema/UserModel');
 
-module.exports = {
-  connect: (mongoose) => {
+
+
+const  connect = () => {
     debug('connecting to mongodb...');
-    return mongoose.createConnection(mongoURI, options).then((conn) => {
-      debug('connected to mongodb, readyState', conn.readyState);
-      return conn;
+    return mongoose.connect(mongoURI, options).then((mongoose) => {
+      debug('connected to mongodb, readyState', mongoose.connection.readyState);
+      debug('if accessed through package, readyState', require('mongoose').connection.readyState);
+      return mongoose.connection;
     })
       .catch(() => debug('failed to connect to mongodb, readyState, ', mongoose.connection.readyState));
-  },
-  setup: (mongoose) => {
+  };
+const  setup = () => {
     debug('setting up mongoose globals...');
     mongoose.Promise = global.Promise;
-    debug('registering timestamp plug-in...');
+    debug('registering global plug-in...');
     mongoose.plugin(timestamp);
     debug('registering mongoose models...');
+    //TODO: move the logic to schema/index.js
     mongoose.model('User', UserSchema);
+    debug('all models are registered');
+  };
+
+module.exports = {
+  init: () => {
+    setup();
+    return connect();
   }
 };
+

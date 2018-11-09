@@ -9,14 +9,10 @@ const dbUtil = require('./setup/mongoose');
 
 const app = express();
 
-//***** setup mongoose *****
-dbUtil.setup(mongoose);
-
-//***** connect mongodb *****
-dbUtil.connect(mongoose)
-  .then((connectedDB) => {
+// ***** setup/connect mongoose *****
+dbUtil.init()
+  .then(() => {
     // ***** bring up express *****
-    app.locals.db = connectedDB;
     serverUtil.middleWare(app);
     serverUtil.routes(app);
     serverUtil.errorHandlers(app);

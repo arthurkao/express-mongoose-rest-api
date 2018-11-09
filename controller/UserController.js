@@ -2,112 +2,107 @@ const _debug = require('debug');
 const debug = _debug('controller:user');
 const Boom = require('boom');
 
+const db = require('mongoose');
+const { UserService } = require('../service');
+
+// Controller (express route handler):
+// TODO 1. validate params and args with joi,
+// TODO 2. call Services(MODEL) to full fill the REST request
+// TODO 3. setup http status code and call res.send(...)
+// Is the interface between http (outer facing) API and data service (inner facing) API
+// Controller: implement User related API business logic w/o DB access
 //TODO: crud test case
-//TODO: http args validation (joi)
-//TODO: api doc swagger like
-//TODO: login logout signup (JWT token)
+//TODO: User login logout signup (JWT token)
 /**
  * UserController.js
  *
  * @description :: Server-side logic for managing Users.
  */
 module.exports = {
-
   /**
    * UserController.list()
    */
-  list: function (req, res, next) {
+  list: (req, res) => {
     debug('list invoked');
-    req.db.model('User').find(function (err, users) {
-      if (err) {
-        const msg = 'MongoError when finding users';
-        return next(Boom.internal(msg, err));
-      }
-      return res.json(users);
-    });
+    return UserService.getUsers()
+      .then((users) => {
+        return res.json(users);
+      }, (err) => {
+        throw Boom.internal('Error when finding users', err);
+      });
   },
 
   /**
    * UserController.show()
    */
-  show: function (req, res, next) {
+  show: (req, res) => {
     var id = req.params.id;
     debug('show invoked with id: ', id);
-    req.db.model('User').findOne({_id: id}, function (err, user) {
-      if (err) {
-        const msg = 'MongoError when finding user: ' + id;
-        debug(msg);
-        return next(Boom.internal(msg, err));
-      }
-      if (!user) {
-        return next(Boom.notFound('User not found'));
-      }
-      return res.json(user);
-    });
+    return UserService.getUser(id)
+      .then((user) => {
+        if(user){
+          return res.json(user);
+        } else {
+          throw Boom.notFound('User not found');
+        }
+      }, (err) => {
+        throw Boom.internal('MongoError when find user', err);
+      });
   },
 
   /**
    * UserController.create()
    */
-  create: function (req, res, next) {
+  create: function (req, res) {
     debug('create invoked');
-    const user = req.db.model('User')({
+    const userJSON = {
       username : req.body.username,
       password : req.body.password,
       email : req.body.email
 
-    });
+    };
     debug('attempt to save new User');
-    user.save(function (err, savedUser) {
-      if (err) {
-        const msg = 'MongoError when creating user';
-        debug(msg);
-        return next(Boom.internal(msg, err));
-      }
-      return res.status(201).json(savedUser);
-    });
+    return UserService.createUser(userJSON)
+      .then((createdUser) => {
+        return res.status(201).json(createdUser);
+      }, (err) => {
+        if(err.message === UserService.USER_EXIST){
+          // user exists in database, likely caused by dup key(s)
+          throw Boom.internal(err);
+        } else {
+          throw Boom.internal('Error creating user', err);
+        }
+      });
   },
 
   /**
    * UserController.update()
    */
-  update: function (req, res, next) {
-    var id = req.params.id;
-    debug('update invoked with id: ', id);
-    req.db.model('User').findOne({_id: id}, function (err, user) {
-      if (err) {
-        const msg = 'MongoError when getting user';
-        return next(Boom.internal(msg, err));
+  update: function (req, res) {
+    const id = req.params.id;
+    const userJSON = (({username, password, email}) => ({username, password, email}))(req.body);
+    debug('update invoked with id: ', id, 'userJSON: ', userJSON);
+    return UserService.updateUser(id, userJSON).then((updatedUser) => {
+      return res.json(updatedUser);
+    }, (err) => {
+      if(err.message === UserService.USER_NOT_EXIST){
+        throw Boom.notFound('User not Found');
+      }else{
+        throw Boom.internal('Error updating user', err);
       }
-      if (!user) {
-        return next(Boom.notFound('User not found'));
-      }
-      user.username = req.body.username ? req.body.username : user.username;
-      user.password = req.body.password ? req.body.password : user.password;
-      user.email = req.body.email ? req.body.email : user.email;
-
-      user.save(function (err, user) {
-        if (err) {
-          return next(Boom.internal('MongoError when updating user', err));
-        }
-
-        return res.json(user);
-      });
     });
   },
 
   /**
    * UserController.remove()
    */
-  remove: function (req, res, next) {
+  remove: function (req, res) {
     var id = req.params.id;
     debug('remove invoked with id: ', id);
-    req.db.model('User').findByIdAndRemove(id, function (err, user) {
-      if (err) {
-        const msg = 'MongoError when deleting user';
-        return next(Boom.internal(msg, err));
-      }
+    return UserService.deleteUser(id).then((_) => {
       return res.status(204).json();
+    }, (err) => {
+      throw Boom.internal('Error deleting user', err);
     });
   }
 };

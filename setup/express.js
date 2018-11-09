@@ -35,11 +35,6 @@ module.exports = {
     // enable CORS - Cross Origin Resource Sharing
     app.use(cors());
 
-    //append db connection ref to req
-    app.use((req, res, next) => {
-      req.db = req.app.locals.db;
-      next();
-    });
   },
   routes: (app) => {
     debug('setup routes');
@@ -49,6 +44,8 @@ module.exports = {
     // setup other (static) routes
     app.get('/', (req, res) => res.send('Express-Mongoose-Rest-Api'));
 
+    // the catch all route
+    app.all('*', (req, res) => res.status(404).send('Page Not Found'));
   },
   errorHandlers: (app) => {
     debug('setup custom error handlers');
