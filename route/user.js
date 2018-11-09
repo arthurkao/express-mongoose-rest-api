@@ -3,10 +3,19 @@ const Boom = require('boom');
 const router = express.Router();
 
 const { UserController } = require('../controller');
-//TODO /api doc (swagger)
 
-// pass req, res objects on to controller function (returns promise)
-// and handle error (rejected promise) by passing to next.
+//TODO /login /logout signup (JWT token)
+//TODO /api doc (swagger)
+//TODO crud route level test case (supertest)
+
+/**
+ * Wrap a controller function that takes req, res and returns a promise
+ * returns a standard express route handler that handles error (rejected promise)
+ * by passing to next. resolved promise is dropped.
+ *
+ * @param ctrFn
+ * @returns {Function}
+ */
 function wrap(ctrFn) {
   return (req, res, next) => {
     ctrFn(req, res).catch(next);

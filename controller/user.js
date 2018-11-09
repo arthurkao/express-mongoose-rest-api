@@ -1,23 +1,30 @@
 const _debug = require('debug');
 const debug = _debug('controller:user');
 const Boom = require('boom');
-
+const Joi = require('joi');
 const db = require('mongoose');
+
 const { UserService } = require('../service');
 
 const isMongoID = function(id) {
   const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
   return checkForHexRegExp.test(id);
 };
-// TODO 1. validate params and args with joi,
-// 2. call Services(MODEL) to fulfill the REST request
-// 3. setup http status code and call res.send(...)
-//TODO 4. crud test case (supertest)
-//TODO 5. User login logout signup (JWT token)
+
+const UserJSONSchema = Joi.object().keys({
+  username: Joi.string().alphanum().min(3).max(30).required(),
+  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+  email: Joi.string().email({ minDomainAtoms: 2 })
+});
+
 /**
  * UserController.js
  *
- * @description :: Controller for /user api
+ * @description :: Controller for /user api that
+ * 1. Validate input in param/req.body
+ * 2. Invoke respective service to provide data
+ * 3.1 Setup http status code and call res.send(...)
+ * 3.2 throw Boom http error (will be handled in a custom Boom error handler middleware)
  */
 module.exports = {
   /**
@@ -58,13 +65,12 @@ module.exports = {
    * UserController.create()
    */
   create: function (req, res) {
-    debug('create invoked');
-    const userJSON = {
-      username : req.body.username,
-      password : req.body.password,
-      email : req.body.email
-
-    };
+    const userJSON = (({username, password, email}) => ({username, password, email}))(req.body);
+    debug('create invoked with userJSON: ', userJSON);
+    const result = Joi.validate(userJSON, UserJSONSchema);
+    if(result.error){
+      throw Boom.badData(result.error);
+    }
     debug('attempt to save new User');
     return UserService.createUser(userJSON)
       .then((createdUser) => {
@@ -86,6 +92,13 @@ module.exports = {
     const id = req.params.id;
     const userJSON = (({username, password, email}) => ({username, password, email}))(req.body);
     debug('update invoked with id: ', id, 'userJSON: ', userJSON);
+    if(!isMongoID(id)){
+      throw Boom.badData('Invalid ID');
+    }
+    const result = Joi.validate(userJSON, UserJSONSchema);
+    if(result.error){
+      throw Boom.badData(result.error);
+    }
     return UserService.updateUser(id, userJSON).then((updatedUser) => {
       return res.json(updatedUser);
     }, (err) => {
