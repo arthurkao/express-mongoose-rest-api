@@ -5,15 +5,19 @@ const Boom = require('boom');
 const db = require('mongoose');
 const { UserService } = require('../service');
 
+const isMongoID = function(id) {
+  const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+  return checkForHexRegExp.test(id);
+};
 // TODO 1. validate params and args with joi,
-// TODO 2. call Services(MODEL) to full fill the REST request
-// TODO 3. setup http status code and call res.send(...)
-//TODO: crud test case
-//TODO: User login logout signup (JWT token)
+// 2. call Services(MODEL) to fulfill the REST request
+// 3. setup http status code and call res.send(...)
+//TODO 4. crud test case (supertest)
+//TODO 5. User login logout signup (JWT token)
 /**
  * UserController.js
  *
- * @description :: Server-side logic for managing Users.
+ * @description :: Controller for /user api
  */
 module.exports = {
   /**
@@ -35,6 +39,9 @@ module.exports = {
   show: (req, res) => {
     var id = req.params.id;
     debug('show invoked with id: ', id);
+    if(!isMongoID(id)){
+      throw Boom.badData('Invalid ID');
+    }
     return UserService.getUser(id)
       .then((user) => {
         if(user){
@@ -96,6 +103,9 @@ module.exports = {
   remove: function (req, res) {
     var id = req.params.id;
     debug('remove invoked with id: ', id);
+    if(!isMongoID(id)){
+      throw Boom.badData('Invalid ID');
+    }
     return UserService.deleteUser(id).then((_) => {
       return res.status(204).json();
     }, (err) => {
