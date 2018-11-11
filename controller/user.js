@@ -2,7 +2,6 @@ const _debug = require('debug');
 const debug = _debug('controller:user');
 const Boom = require('boom');
 const Joi = require('joi');
-const db = require('mongoose');
 
 const { UserService } = require('../service');
 
@@ -17,6 +16,7 @@ const UserJSONSchema = Joi.object().keys({
   email: Joi.string().email({ minDomainAtoms: 2 })
 });
 
+//TODO: remove user.password from response JSON
 /**
  * UserController.js
  *

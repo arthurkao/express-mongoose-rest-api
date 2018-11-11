@@ -6,6 +6,8 @@
  * No database access in this layer.
  */
 const UserController = require('./user');
+const AuthController = require('./auth');
 module.exports = {
+  AuthController,
   UserController
 };
