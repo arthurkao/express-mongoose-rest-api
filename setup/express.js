@@ -49,6 +49,14 @@ module.exports = {
   },
   errorHandlers: (app) => {
     debug('setup custom error handlers');
+    // express-jwt error handler
+    app.use((err, req, res, next) => {
+      if(err.name === 'UnauthorizedError'){
+        _debug('app:error')('handling express-jwt error...');
+        return next(Boom.unauthorized('protected route'));
+      }
+      return next(err);
+    });
     // boom error handler
     app.use((err, req, res, next) => {
       const debug = _debug('app:error');
@@ -63,6 +71,6 @@ module.exports = {
       }
       // let default error handler manage other non-api errors
       return next(err);
-    })
+    });
   }
 };

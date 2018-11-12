@@ -19,7 +19,7 @@ UserSchema.statics.validatePassword = function (password, hash) {
   return bcrypt.compare(password, hash);
 };
 
-UserSchema.methods.generateJWT = function(fields = ['username'], ttl = '30s') {
+UserSchema.methods.generateJWT = function(fields = ['username'], ttl = '1w') {
   const user = this;
   const opts = { expiresIn: ttl };
   let payload = {};

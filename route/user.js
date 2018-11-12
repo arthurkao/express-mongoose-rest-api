@@ -1,12 +1,14 @@
 const express = require('express');
 const Boom = require('boom');
+const jwt = require('express-jwt');
 const router = express.Router();
 
 const { UserController } = require('../controller');
 
-//TODO /login /logout signup (JWT token)
 //TODO /api doc (swagger)
 //TODO crud route level test case (supertest)
+
+const authMiddleware = jwt({ secret: process.env.JWT_SECRET });
 
 /**
  * Wrap a controller function that takes req, res and returns a promise
@@ -35,16 +37,16 @@ router.get('/:id', wrap(UserController.show));
 /*
  * POST
  */
-router.post('/', wrap(UserController.create));
+router.post('/', authMiddleware, wrap(UserController.create));
 
 /*
  * PUT
  */
-router.put('/:id', wrap(UserController.update));
+router.put('/:id', authMiddleware, wrap(UserController.update));
 
 /*
  * DELETE
  */
-router.delete('/:id', wrap(UserController.remove));
+router.delete('/:id', authMiddleware, wrap(UserController.remove));
 
 module.exports = router;
