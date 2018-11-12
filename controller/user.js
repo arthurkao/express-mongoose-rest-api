@@ -16,7 +16,6 @@ const UserJSONSchema = Joi.object().keys({
   email: Joi.string().email({ minDomainAtoms: 2 })
 });
 
-//TODO: remove user.password from response JSON
 /**
  * UserController.js
  *
@@ -91,7 +90,8 @@ module.exports = {
   update: function (req, res) {
     const id = req.params.id;
     const userJSON = (({username, password, email}) => ({username, password, email}))(req.body);
-    debug('update invoked with id: ', id, 'userJSON: ', userJSON);
+    debug('update invoked with id: ', id);
+    //debug('update invoked with id: ', id, 'userJSON: ', userJSON);
     if(!isMongoID(id)){
       throw Boom.badData('Invalid ID');
     }

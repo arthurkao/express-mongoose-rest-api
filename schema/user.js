@@ -10,13 +10,9 @@ var UserSchema = new mongoose.Schema({
   'email' : { type: String, unique: true, index: true }
 });
 
-UserSchema.statics.encryptPassword = function(password) {
-  return bcrypt.hash(password, 8)
-};
-
-UserSchema.statics.validatePassword = function (password, hash) {
-  //compare (submitted) password against (stored) hash
-  return bcrypt.compare(password, hash);
+//compare (submitted) password against (stored) hash
+UserSchema.methods.validatePassword = function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 UserSchema.methods.generateJWT = function(fields = ['username'], ttl = '1w') {
@@ -39,5 +35,24 @@ UserSchema.methods.generateJWT = function(fields = ['username'], ttl = '1w') {
   });
   return p;
 };
+
+/**
+ * pre save hook to hash the clear text password
+ */
+UserSchema.pre('save', function(next) {
+  var user = this;
+
+  // only hash the password if it has been modified (or is new)
+  if (!user.isModified('password')) return next();
+
+  // hash the password with bcrypt generated salt
+  bcrypt.hash(user.password, 8, function(err, hash) {
+    if (err) return next(err);
+
+    // override the cleartext password with the hashed one
+    user.password = hash;
+    next();
+  });
+});
 
 module.exports = UserSchema;
