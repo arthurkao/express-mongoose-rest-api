@@ -7,8 +7,6 @@ const USER_NOT_EXIST = 'USER_NOT_EXIST';
 const USER_NOT_UNIQUE = 'USER_NOT_UNIQUE';
 const USER_PASSWORD_NOT_MATCH = 'USER_PASSWORD_NOT_MATCH';
 
-//TODO: remove user.password from response JSON in UserService
-
 module.exports = {
   USER_EXIST,
   USER_NOT_EXIST,
@@ -16,29 +14,31 @@ module.exports = {
   getUsers: () => {
     // return all Users in DB
     debug('getUsers invoked');
-    return db.model('User').find().exec().then((users) => users, (err) => {
-      debug('MongoError when finding users');
-      throw err;
-    });
+    return db.model('User').find().select('-password').lean().exec()
+      .catch((err) => {
+        debug('MongoError ', err);
+        throw err;
+      });
   },
   getUser: (id) => {
     // return one user if found in db.
     debug('getUser invoked with id: ', id);
-    return db.model('User').findById(id).exec().then((user) => user, (err) => {
-      debug('MongoError when finding user by id: ', id);
-      throw err;
-    });
+    return db.model('User').findById(id).select('-password').lean().exec()
+      .catch((err) => {
+        debug('MongoError when finding user by id: ', id);
+        throw err;
+      });
   },
   createUser: (userJSON) => {
     debug('createUser invoked with json: ', userJSON);
     const UserModel = db.model('User');
     const user = new UserModel(userJSON);
-    return user.save().then(({username, email}) => ({username, email}), (err) => {
+    return user.save().then(({_id, username, email}) => ({_id, username, email}), (err) => {
       debug('MongoError when creating user');
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new Error(USER_EXIST);
       } else {
-        debug('other mongo error');
+        debug('MongoError ', err);
         throw err;
       }
     });
@@ -56,13 +56,13 @@ module.exports = {
         user.set(userJSON);
         return user.save();
       })
-      .then(({username, email}) => ({username, email}))
+      .then(({_id, username, email}) => ({_id, username, email}))
       .catch((err) => {
         debug('MongoError when updating user');
         if (err.name === 'MongoError' && err.code === 11000) {
           throw new Error(USER_NOT_UNIQUE);
         } else {
-          debug('other mongo error', err);
+          debug('MongoError ', err);
           throw err;
         }
       });
@@ -70,7 +70,7 @@ module.exports = {
   deleteUser: (id) => {
     debug('deleteUser invoked with id: ', id);
     return db.model('User').findByIdAndRemove(id).exec().catch((err) => {
-      debug('MongoError when deleting user');
+      debug('MongoError ', err);
       throw err;
     });
   },
@@ -93,7 +93,8 @@ module.exports = {
             throw new Error(USER_PASSWORD_NOT_MATCH);
           }
         } ,(err) => {
-          throw new Error('MongoError when validating user password', err);
+          debug('MongoError when validating user password', err);
+          throw err;
         });
       })
       .then((user) => {
