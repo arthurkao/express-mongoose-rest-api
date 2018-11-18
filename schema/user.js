@@ -8,6 +8,8 @@ var UserSchema = new mongoose.Schema({
   'username' : { type: String, required: true, trim: true, unique: true, index: true  },
   'password' : { type: String, required: true },
   'email' : { type: String, unique: true, index: true }
+},{
+  toJSON: { getters: true } // id field is defined in getters (not stored in mongo doc)
 });
 
 //compare (submitted) password against (stored) hash
