@@ -23,3 +23,10 @@ dbUtil.init()
 
 
 
+//TODO /api doc (swagger)
+//test: controller unit test(do not unit test route handler)
+//TODO test: service unit test (research no DB access?)
+//TODO test: api level integration test (supertest)
+//1. public: root undefined healthcheck
+//2. auth: login
+//3. user: crud

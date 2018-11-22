@@ -5,9 +5,6 @@ const router = express.Router();
 
 const { UserController } = require('../controller');
 
-//TODO /api doc (swagger)
-//TODO crud route level test case (supertest)
-
 const authMiddleware = jwt({ secret: process.env.JWT_SECRET });
 
 /**

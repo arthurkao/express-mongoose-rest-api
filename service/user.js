@@ -7,23 +7,51 @@ const USER_NOT_EXIST = 'USER_NOT_EXIST';
 const USER_NOT_UNIQUE = 'USER_NOT_UNIQUE';
 const USER_PASSWORD_NOT_MATCH = 'USER_PASSWORD_NOT_MATCH';
 
+function buildGetUsersQuery({filter, sort, skip, limit}, count=false) {
+  let query = db.model('User').find();
+  if(filter && !!filter.q){
+    // filter.q is the query string to match any part inside username
+    //debug('filter: ', filter);
+    query = query.where('username', { $regex: filter.q });
+  }
+  if(count) {
+    return query;
+  }
+  if(sort){
+    query = query.sort(sort);
+  }
+  if(skip){
+    query = query.skip(skip);
+  }
+  if(limit){
+    query = query.limit(limit);
+  }
+  return query;
+}
+
 module.exports = {
   USER_EXIST,
   USER_NOT_EXIST,
   USER_NOT_UNIQUE,
-  getUsers: () => {
-    // return all Users in DB
+  USER_PASSWORD_NOT_MATCH,
+  getUsers: (opt = {}) => {
     debug('getUsers invoked');
-    return db.model('User').find().select('-password').lean().exec()
-      .catch((err) => {
-        debug('MongoError ', err);
+    const fetchUsers =  buildGetUsersQuery(opt).select('-password');
+    const countUsers = buildGetUsersQuery(opt, true).countDocuments();
+    return Promise.all([fetchUsers.exec(), countUsers.exec()])
+      .then(values => ({
+        data: values[0],
+        total: values[1]
+      }))
+      .catch(err => {
+        debug('MongoErr when finding users: ', err);
         throw err;
       });
   },
   getUser: (id) => {
     // return one user if found in db.
     debug('getUser invoked with id: ', id);
-    return db.model('User').findById(id).select('-password').lean().exec()
+    return db.model('User').findById(id).select('-password').exec()
       .catch((err) => {
         debug('MongoError when finding user by id: ', id);
         throw err;
@@ -33,7 +61,7 @@ module.exports = {
     debug('createUser invoked with json: ', userJSON);
     const UserModel = db.model('User');
     const user = new UserModel(userJSON);
-    return user.save().then(({_id, username, email}) => ({_id, username, email}), (err) => {
+    return user.save().catch((err) => {
       debug('MongoError when creating user');
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new Error(USER_EXIST);
@@ -45,7 +73,10 @@ module.exports = {
   },
   updateUser: (id, userJSON) => {
     debug('updateUser invoked with id: ', id);
-    // Avoid findbyIdAndUpdate because pre save hook will not be invoked that way.
+    if(!!userJSON.id) {
+      delete userJSON.id;
+    }
+    // Avoid findByIdAndUpdate because pre save hook will not be invoked that way.
     return db.model('User').findById(id).exec()
       .catch((err) => {
         debug('MongoError when finding user by id: ', id);
@@ -56,7 +87,6 @@ module.exports = {
         user.set(userJSON);
         return user.save();
       })
-      .then(({_id, username, email}) => ({_id, username, email}))
       .catch((err) => {
         debug('MongoError when updating user');
         if (err.name === 'MongoError' && err.code === 11000) {

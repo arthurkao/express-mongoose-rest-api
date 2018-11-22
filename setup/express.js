@@ -9,6 +9,11 @@ const Boom = require('boom');
 
 const debug = _debug('setup:express');
 const route = require('../route');
+
+const corsOpts = {
+  exposedHeaders: ['Content-Range']
+};
+
 module.exports = {
   middleWare: (app) => {
     debug('setup middleware');
@@ -33,7 +38,7 @@ module.exports = {
     app.use(helmet());
 
     // enable CORS - Cross Origin Resource Sharing
-    app.use(cors());
+    app.use(cors(corsOpts));
 
   },
   routes: (app) => {

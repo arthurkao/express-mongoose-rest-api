@@ -6,7 +6,7 @@ const { UserService } = require('../service');
 
 const loginJSONSchema = Joi.object().keys({
   username: Joi.string().alphanum().min(3).max(30).required(),
-  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/)
+  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required()
 });
 
 
@@ -26,7 +26,7 @@ module.exports = {
     const userJSON = (({username, password}) => ({username, password}))(req.body);
     const result = Joi.validate(userJSON, loginJSONSchema);
     if(result.error){
-      throw Boom.badData(result.error);
+      return Promise.reject(Boom.badData(result.error));
     }
     return UserService.loginUser(userJSON).then((token) => {
       debug('login succeeded, token generated: ', token);
