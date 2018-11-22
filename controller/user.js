@@ -3,57 +3,10 @@ const debug = _debug('controller:user');
 const Boom = require('boom');
 const Joi = require('joi');
 
+const { filterObjByKeys, isMongoId } = require('../util');
 const { UserService } = require('../service');
 
-const isMongoID = function(id) {
-  const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
-  return checkForHexRegExp.test(id);
-};
-
-// TODO Move ra-simple-rest logic specific to ra-simple-rest helper
-const filterObjByKeys = function(obj, keys){
-  return Object.keys(obj).filter(key => keys.includes(key)).reduce((o, key) => ({...o, [key]: obj[key]}), {});
-};
-
-/**
- * Helper specifically to transform react-admin ra-simple-rest dataProvider query
- * see https://marmelab.com/react-admin/DataProviders.html and ra-simple-rest source
- * @param o
- * @returns {{}}
- */
-const transformRAQueryOpt = function(o) {
-  let obj = {};
-  if(Object.keys(o).length === 0 && o.constructor === Object) return obj;
-  Object.keys(o).map(key => {
-    let value = o[key];
-    try {
-      value = JSON.parse(value);
-    }catch(err){
-      //error parsing o[key]. skip
-      value = o[key];
-    }
-    obj[key] = value;
-  });
-
-  // To match ra-simple-rest dataProvider syntax
-  const sort = obj.sort;
-  if(!!sort && Array.isArray(sort) && sort.length === 2){
-    //convert array to obj
-    let [key, value] = sort;
-    if(key === 'id') key = '_id';
-    obj.sort = {[key]: value};
-  }
-  const range = obj.range;
-  if(!!range && Array.isArray(range) && range.length === 2){
-    //convert range = [0, 9] to skip = 0, limit = 10
-    obj.skip = range[0];
-    obj.limit = range[1] - range[0] + 1;
-  }
-
-  return obj;
-};
-
-//TODO debug when pagination with ra-simple-data
+//TODO debug when pagination with ra-simple-data after deleting resource, move to ra helper
 const buildRAContentRange = function(total, opt) {
   let contentRange = 'user ';
   const range = opt.range;
@@ -91,9 +44,8 @@ module.exports = {
    */
   list: (req, res) => {
     debug('list invoked');
-    const allowed = ['filter', 'range', 'sort'];
-    let opt = filterObjByKeys(req.query, allowed);
-    opt = transformRAQueryOpt(opt);
+    const allowed = ['filter', 'range', 'sort', 'limit', 'skip'];
+    const opt = filterObjByKeys(req.query, allowed);
     return UserService.getUsers(opt)
       .then((r) => {
         const users = r.data;
@@ -110,7 +62,7 @@ module.exports = {
   show: (req, res) => {
     var id = req.params.id;
     debug('show invoked with id: ', id);
-    if(!isMongoID(id)){
+    if(!isMongoId(id)){
       return Promise.reject(Boom.badData('Invalid ID'));
     }
     return UserService.getUser(id)
@@ -158,7 +110,7 @@ module.exports = {
     const allowed = ['username', 'password', 'email'];
     const userJSON = filterObjByKeys(req.body, allowed);
     debug('update invoked with id: ', id, 'userJSON: ', userJSON);
-    if(!isMongoID(id)){
+    if(!isMongoId(id)){
       return Promise.reject(Boom.badData('Invalid ID'));
     }
     const result = Joi.validate(userJSON, UserJSONSchema);
@@ -182,7 +134,7 @@ module.exports = {
   remove: function (req, res) {
     var id = req.params.id;
     debug('remove invoked with id: ', id);
-    if(!isMongoID(id)){
+    if(!isMongoId(id)){
       return Promise.reject(Boom.badData('Invalid ID'));
     }
     return UserService.deleteUser(id).then((_) => {

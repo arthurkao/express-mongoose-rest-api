@@ -9,6 +9,8 @@ const Boom = require('boom');
 
 const debug = _debug('setup:express');
 const route = require('../route');
+const parseReqQueryObject = require('../route/middleware/parseReqQuery');
+const transformRASimpleRest = require('../route/middleware/transformRASimpleRest');
 
 const corsOpts = {
   exposedHeaders: ['Content-Range']
@@ -39,6 +41,12 @@ module.exports = {
 
     // enable CORS - Cross Origin Resource Sharing
     app.use(cors(corsOpts));
+
+    // JSON.parse req.query
+    app.use(parseReqQueryObject);
+
+    // client specific middleware
+    app.use(transformRASimpleRest);
 
   },
   routes: (app) => {
