@@ -3,25 +3,8 @@ const debug = _debug('controller:user');
 const Boom = require('boom');
 const Joi = require('joi');
 
-const { filterObjByKeys, isMongoId } = require('../util');
+const { filterObjByKeys, isMongoId, ra } = require('../util');
 const { UserService } = require('../service');
-
-//TODO debug when pagination with ra-simple-data after deleting resource, move to ra helper
-const buildRAContentRange = function(total, opt) {
-  let contentRange = 'user ';
-  const range = opt.range;
-  if(!!range && Array.isArray(range) && range.length === 2) {
-    let [start, end] = range;
-    debug('start, end: ', start, end);
-    contentRange += start + '-';
-    contentRange += (end < total-1)? end: total-1; //in case end points over the end of docs
-  }else {
-    contentRange += (total === 0)? '0-0': '0-' + total-1;
-  }
-  contentRange += '/' + total;
-  debug('contentRange: ', contentRange);
-  return contentRange;
-};
 
 const UserJSONSchema = Joi.object().keys({
   username: Joi.string().alphanum().min(3).max(30).required(),
@@ -49,7 +32,13 @@ module.exports = {
     return UserService.getUsers(opt)
       .then((r) => {
         const users = r.data;
-        res.set('Content-Range', buildRAContentRange(r.total, opt));
+        const range = opt.range;
+
+        // add 'Content-Range' header so clients handle pagination properly.
+        if (!!range && Array.isArray(range) && range.length === 2) {
+          const [start, end, total] = ra.calculateContentRange(opt.range[0], opt.range[1], r.total);
+          res.set('Content-Range', start + '-' + end + '/' + total);
+        }
         return res.json(users);
       }, (err) => {
         throw Boom.internal('Error when finding users', err);

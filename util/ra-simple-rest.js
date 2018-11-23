@@ -21,5 +21,10 @@ module.exports = {
       obj.limit = range[1] - range[0] + 1;
     }
     return obj;
+  },
+  calculateContentRange: (start, end, total) => {
+    if(total === 0) return [0,0,0];
+    if(end >= total) end = total-1;
+    return [start, end, total];
   }
 };
