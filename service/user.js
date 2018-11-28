@@ -36,7 +36,7 @@ module.exports = {
   USER_PASSWORD_NOT_MATCH,
   getUsers: (opt = {}) => {
     debug('getUsers invoked');
-    const fetchUsers =  buildGetUsersQuery(opt).select('-password');
+    const fetchUsers =  buildGetUsersQuery(opt);
     const countUsers = buildGetUsersQuery(opt, true).countDocuments();
     return Promise.all([fetchUsers.exec(), countUsers.exec()])
       .then(values => ({
@@ -51,7 +51,7 @@ module.exports = {
   getUser: (id) => {
     // return one user if found in db.
     debug('getUser invoked with id: ', id);
-    return db.model('User').findById(id).select('-password').exec()
+    return db.model('User').findById(id).exec()
       .catch((err) => {
         debug('MongoError when finding user by id: ', id);
         throw err;
@@ -69,6 +69,10 @@ module.exports = {
         debug('MongoError ', err);
         throw err;
       }
+    }).then((user) => {
+      let userJSON = user.toJSON();
+      if(!!userJSON.password) delete userJSON.password;
+      return userJSON;
     });
   },
   updateUser: (id, userJSON) => {
@@ -95,6 +99,11 @@ module.exports = {
           debug('MongoError ', err);
           throw err;
         }
+      })
+      .then((user) => {
+        let userJSON = user.toJSON();
+        if(!!userJSON.password) delete userJSON.password;
+        return userJSON;
       });
   },
   deleteUser: (id) => {
@@ -106,7 +115,7 @@ module.exports = {
   },
   loginUser: ({username, password}) => {
     debug('loginUser invoked');
-    return db.model('User').findOne({username}).exec()
+    return db.model('User').findOne({username}).select('+password').exec()
       .catch((err) => {
         throw new Error(USER_NOT_EXIST);
       })
