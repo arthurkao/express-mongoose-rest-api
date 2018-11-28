@@ -17,8 +17,10 @@ module.exports = {
     }
     if(!!range && Array.isArray(range) && range.length === 2){
       //convert range = [0, 9] to skip = 0, limit = 10
-      obj.skip = range[0];
-      obj.limit = range[1] - range[0] + 1;
+      const start = parseInt(range[0]);
+      const end = parseInt(range[1]);
+      obj.skip = start;
+      obj.limit = end > start? end - start + 1: 10;
     }
     return obj;
   },
