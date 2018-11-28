@@ -6,7 +6,7 @@ const debug = require('debug')('db:user');
 
 var UserSchema = new mongoose.Schema({
   'username' : { type: String, required: true, trim: true, unique: true, index: true  },
-  'password' : { type: String, required: true },
+  'password' : { type: String, required: true, select: false },
   'email' : { type: String, unique: true, index: true }
 },{
   toJSON: { getters: true } // id field is defined in getters (not stored in mongo doc)
