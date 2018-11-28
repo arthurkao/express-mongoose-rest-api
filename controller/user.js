@@ -6,11 +6,17 @@ const Joi = require('joi');
 const { filterObjByKeys, isMongoId, ra } = require('../util');
 const { UserService } = require('../service');
 
-const UserJSONSchema = Joi.object().keys({
-  username: Joi.string().alphanum().min(3).max(30).required(),
-  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+const createUserJSONSchema = Joi.object().keys({
+  username: Joi.string().alphanum().min(3).max(30).trim().required(),
+  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required(),
   email: Joi.string().email({ minDomainAtoms: 2 })
 });
+
+const updateUserJSONSchema = Joi.object().keys({
+  username: Joi.string().alphanum().min(3).max(30).trim(),
+  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+  email: Joi.string().email({ minDomainAtoms: 2 })
+}).min(1);
 
 /**
  * UserController.js
@@ -37,7 +43,7 @@ module.exports = {
         // add 'Content-Range' header so clients handle pagination properly.
         if (!!range && Array.isArray(range) && range.length === 2) {
           const [start, end, total] = ra.calculateContentRange(opt.range[0], opt.range[1], r.total);
-          res.set('Content-Range', start + '-' + end + '/' + total);
+          res.set('Content-Range', 'user ' + start + '-' + end + '/' + total);
         }
         return res.json(users);
       }, (err) => {
@@ -73,7 +79,7 @@ module.exports = {
     const allowed = ['username', 'password', 'email'];
     const userJSON = filterObjByKeys(req.body, allowed);
     debug('create invoked with userJSON: ', userJSON);
-    const result = Joi.validate(userJSON, UserJSONSchema);
+    const result = Joi.validate(userJSON, createUserJSONSchema);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }
@@ -102,7 +108,7 @@ module.exports = {
     if(!isMongoId(id)){
       return Promise.reject(Boom.badData('Invalid ID'));
     }
-    const result = Joi.validate(userJSON, UserJSONSchema);
+    const result = Joi.validate(userJSON, updateUserJSONSchema);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }
