@@ -16,6 +16,46 @@ router.use((req, res, next) => {
 
 // ***** register /api routes here *****
 // /api/* routes
+/**
+ * @swagger
+ *
+ * /api/login:
+ *   post:
+ *     summary: login user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             username:
+ *               type: string
+ *               required: true
+ *             password:
+ *               type: string
+ *               required: true
+ *           example:
+ *             username: testuser
+ *             password: testpassword
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       201:
+ *         description: token created
+ *         content:
+ *           application/jason:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: jwt token for protected routes
+ *       422:
+ *         description: Bad request. username / password must present
+ *       401:
+ *         description: Authorization information is invalid
+ *       5XX:
+ *         description: Unexpected Error
+ */
 router.post('/login', (req, res, next) => {
   AuthController.authenticate(req, res).catch(next);
 });

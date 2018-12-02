@@ -4,10 +4,9 @@ const app = require('../../setup/express');
 
 describe('Root level routes', function() {
   describe('GET /', function() {
-    it('should send project name', function(done) {
+    it('should render swagger-ui entry point', function(done) {
       request(app)
         .get('/')
-        .expect(process.env.APP_NAME)
         .expect(200, done);
     });
   });
