@@ -42,7 +42,7 @@ module.exports = {
 
         // add 'Content-Range' header so clients handle pagination properly.
         if (!!range && Array.isArray(range) && range.length === 2) {
-          const [start, end, total] = ra.calculateContentRange(opt.range[0], opt.range[1], r.total);
+          const { start, end, total } = ra.calculateContentRange(opt.range[0], opt.range[1], r.total);
           res.set('Content-Range', 'user ' + start + '-' + end + '/' + total);
         }
         return res.json(users);

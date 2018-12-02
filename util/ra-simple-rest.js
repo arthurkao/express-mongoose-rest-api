@@ -24,9 +24,19 @@ module.exports = {
     }
     return obj;
   },
+  /**
+   * ra-data-simple-rest Content-Range header helper
+   * @param start
+   * @param end
+   * @param total number of documents match query, not end - start + 1
+   * @returns {*} contains required Content-Range information
+   */
   calculateContentRange: (start, end, total) => {
-    if(total === 0) return [0,0,0];
-    if(end >= total) end = total-1;
-    return [start, end, total];
+    if(total === 0) {
+     start = end = total;
+    } else if(start < total && end >= total) {
+      end = total - 1;
+    }
+    return { start, end , total };
   }
 };

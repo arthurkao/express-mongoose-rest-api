@@ -14,7 +14,10 @@ module.exports = {
     });
     return result;
   },
-  filterObjByKeys: (obj, keys) => {
+  filterObjByKeys: (obj, keys = []) => {
+    if(keys.length === 0){
+      keys = Object.keys(obj);
+    }
     return Object.keys(obj).filter(key => keys.includes(key)).reduce((o, key) => ({...o, [key]: obj[key]}), {});
   },
   isMongoId: (id) => {
