@@ -17,7 +17,7 @@ describe('/api routes', function() {
   it('should respond with 415 code to other unsupported media types', function(done) {
     url = mount;
     request(app)
-      .get(url)
+      .post(url)
       .set('Content-Type', 'text/html')
       .expect(415, done);
   });

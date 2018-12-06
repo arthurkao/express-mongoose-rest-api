@@ -8,18 +8,21 @@ const router = express.Router();
 /**
  * middleware to filter out requests other than 'application/json'
  */
-router.use((req, res, next) => {
+function forceJsonContentType (req, res, next) {
   const contentType = req.headers['content-type'];
   return contentType != 'application/json'?
     next(Boom.unsupportedMediaType("Expect application/json")): next();
-});
+}
+
+router.post('*', forceJsonContentType);
+router.put('*', forceJsonContentType);
 
 // ***** register /api routes here *****
 // /api/* routes
 /**
  * @swagger
  *
- * /api/login:
+ * /login:
  *   post:
  *     summary: login user
  *     requestBody:

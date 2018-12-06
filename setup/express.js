@@ -7,7 +7,6 @@ const methodOverride = require('method-override');
 const helmet = require('helmet');
 const cors = require('cors');
 const Boom = require('boom');
-const swaggerUi = require('swagger-ui-express');   //serve swagger-ui via swagger-ui-dist
 
 const debug = _debug('setup:express');
 const route = require('../route');
@@ -43,7 +42,9 @@ const setupMorgan = (app, env = 'dev') => {
   }
 };
 
-const swaggerHandler = () => {
+const swaggerRoute = () => {
+  const router = express.Router();
+  const swaggerUi = require('swagger-ui-express');   //serve swagger-ui via swagger-ui-dist
   const swaggerJSDoc = require('swagger-jsdoc');     //extract api info from respective route JSDoc
   const options = {
     definition: {
@@ -51,15 +52,19 @@ const swaggerHandler = () => {
       info: {
         title: process.env.npm_package_name,         // Title (required)
         version: process.env.npm_package_version     // Version (required)
-      }
+      },
+      servers:[{ url: '/api' }]                      // basePath
     },
     // Path to the API docs
-    apis: ['./route/index.js']
+    apis: ['./route/*.js']
   };
 
   // Initialize swagger-jsdoc -> returns validated swagger spec in json format
   const swaggerSpec = swaggerJSDoc(options);
-  return swaggerUi.setup(swaggerSpec);
+
+  router.use(swaggerUi.serve);
+  router.get('/', swaggerUi.setup(swaggerSpec));
+  return router;
 };
 
 function middlewares(app) {
@@ -92,8 +97,7 @@ function routes(app) {
   app.use('/api', route);
 
   // setup other (static) routes
-  app.use('/', swaggerUi.serve);
-  app.get('/', swaggerHandler());
+  app.use('/', swaggerRoute());
 
   // the catch all route
   app.all('*', (req, res) => res.status(404).send('Page Not Found'));
