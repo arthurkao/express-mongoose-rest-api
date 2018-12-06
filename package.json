@@ -1,6 +1,6 @@
 {
   "name": "express-mongoose-rest-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "REST API server powered by Express/MongoDB with user authentication via JWT",
   "main": "index.js",
   "repository": "https://github.com/arthurkao/express-mongoose-rest-api.git",
