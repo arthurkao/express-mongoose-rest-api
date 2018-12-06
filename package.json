@@ -7,6 +7,13 @@
   "author": "Arthur C. Kao <arthurckao@gmail.com>",
   "license": "MIT",
   "private": false,
+  "keywords": [
+    "express",
+    "mongoose",
+    "openapi",
+    "rest",
+    "jwt"
+  ],
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",

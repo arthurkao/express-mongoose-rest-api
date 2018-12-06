@@ -11,6 +11,5 @@ dbUtil.init().then(() => {
 });
 
 
-//TODO /api doc (swagger) => readme.md
-//TODO test: util unit test
-//TODO test: integration test
+//TODO readme.md
+//TODO test: decouple db/app setup from unit test
