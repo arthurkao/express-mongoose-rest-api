@@ -12,4 +12,3 @@ dbUtil.init().then(() => {
 
 
 //TODO readme.md
-//TODO test: decouple db/app setup from unit test

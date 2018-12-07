@@ -45,7 +45,9 @@
   },
   "scripts": {
     "start": "nodemon -r dotenv/config index.js",
-    "test": "./node_modules/mocha/bin/mocha --file ./test/setup.js --recursive",
-    "test:coverage": "./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/mocha --file ./test/setup.js --recursive"
+    "test:unit": "./node_modules/mocha/bin/mocha --file ./test/setup.js --recursive ./test/unit/*",
+    "test:integration": "./node_modules/mocha/bin/mocha --file ./test/setup.js ./test/integration/dbSetup.js --recursive ./test/integration/*",
+    "test": "npm run test:unit & npm run test:integration",
+    "test:coverage": "./node_modules/nyc/bin/nyc.js npm run test"
   }
 }
