@@ -1,10 +1,8 @@
 const express = require('express');
-const jwt = require('express-jwt');
 const router = express.Router();
 
 const { UserController } = require('../controller');
-
-const authMiddleware = jwt({ secret: process.env.JWT_SECRET });
+const jwtAuth = require('./middleware/jwtAuth');
 
 /**
  * Wrap a controller function that takes req, res and returns a promise
@@ -119,7 +117,7 @@ function wrap(ctrFn) {
  *         $ref: '#components/responses/UnauthorizedError'
  */
 router.get('/', wrap(UserController.list));
-router.post('/', authMiddleware, wrap(UserController.create));
+router.post('/', jwtAuth, wrap(UserController.create));
 
 /**
  * @swagger
@@ -183,7 +181,7 @@ router.post('/', authMiddleware, wrap(UserController.create));
  *       5XX:
  *         $ref: '#components/responses/InternalServerError' */
 router.get('/:id', wrap(UserController.show));
-router.put('/:id', authMiddleware, wrap(UserController.update));
-router.delete('/:id', authMiddleware, wrap(UserController.remove));
+router.put('/:id', jwtAuth, wrap(UserController.update));
+router.delete('/:id', jwtAuth, wrap(UserController.remove));
 
 module.exports = router;
