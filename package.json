@@ -39,7 +39,7 @@
     "chai-sorted": "^0.2.0",
     "faker": "^4.1.0",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.5",
+    "nodemon": "^1.18.8",
     "nyc": "^13.1.0",
     "supertest": "^3.3.0"
   },
