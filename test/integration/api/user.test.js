@@ -80,6 +80,7 @@ describe('/api/user routes', function() {
         .expect(200, done);
     });
     it('should handle filter query', function(done) {
+      url = mount;
       const querystr = 'a';
       const userFixture = require('../../fixture/user')
         .map((user) => (user.username))
