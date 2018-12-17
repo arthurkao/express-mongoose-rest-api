@@ -2,13 +2,15 @@ const db = require('mongoose');
 const _debug = require('debug');
 const debug = _debug('service:user');
 
+const { User } = require('../model');
+
 const USER_EXIST = 'USER_EXIST';
 const USER_NOT_EXIST = 'USER_NOT_EXIST';
 const USER_NOT_UNIQUE = 'USER_NOT_UNIQUE';
 const USER_PASSWORD_NOT_MATCH = 'USER_PASSWORD_NOT_MATCH';
 
 function buildGetUsersQuery({filter, sort, skip, limit}, count=false) {
-  let query = db.model('User').find();
+  let query = User.find();
   if(filter && !!filter.q){
     // filter.q is the query string to match any part inside username
     //debug('filter: ', filter);
@@ -51,7 +53,7 @@ module.exports = {
   getUser: (id) => {
     // return one user if found in db.
     debug('getUser invoked with id: ', id);
-    return db.model('User').findById(id).exec()
+    return User.findById(id).exec()
       .catch((err) => {
         debug('MongoError when finding user by id: ', id);
         throw err;
@@ -59,8 +61,7 @@ module.exports = {
   },
   createUser: (userJSON) => {
     debug('createUser invoked with json: ', userJSON);
-    const UserModel = db.model('User');
-    const user = new UserModel(userJSON);
+    const user = new User(userJSON);
     return user.save().catch((err) => {
       debug('MongoError when creating user');
       if (err.name === 'MongoError' && err.code === 11000) {
@@ -81,7 +82,7 @@ module.exports = {
       delete userJSON.id;
     }
     // Avoid findByIdAndUpdate because pre save hook will not be invoked that way.
-    return db.model('User').findById(id).exec()
+    return User.findById(id).exec()
       .catch((err) => {
         debug('MongoError when finding user by id: ', id);
         throw new Error(USER_NOT_EXIST);
@@ -108,14 +109,14 @@ module.exports = {
   },
   deleteUser: (id) => {
     debug('deleteUser invoked with id: ', id);
-    return db.model('User').findByIdAndRemove(id).exec().catch((err) => {
+    return User.findByIdAndRemove(id).exec().catch((err) => {
       debug('MongoError ', err);
       throw err;
     });
   },
   loginUser: ({username, password}) => {
     debug('loginUser invoked');
-    return db.model('User').findOne({username}).select('+password').exec()
+    return User.findOne({username}).select('+password').exec()
       .catch((err) => {
         throw new Error(USER_NOT_EXIST);
       })

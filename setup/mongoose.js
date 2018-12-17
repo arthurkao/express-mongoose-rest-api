@@ -1,9 +1,7 @@
+const debug = require('debug')('setup:mongoose');
 const timestamp = require('mongoose-timestamp');
-const _debug = require('debug');
 const mongoose = require('mongoose');
-const loadModels = require('../schema');
 
-const debug = _debug('setup:mongoose');
 const mongoURI = 'mongodb://' + process.env.DB_HOST + ':' + process.env.DB_PORT;
 const options = {
   user: process.env.DB_USER,
@@ -36,8 +34,6 @@ const  setup = () => {
     mongoose.Promise = global.Promise;
     debug('registering global plug-in...');
     mongoose.plugin(timestamp);
-    debug('registering mongoose models...');
-    loadModels();
   };
 
 module.exports = {
