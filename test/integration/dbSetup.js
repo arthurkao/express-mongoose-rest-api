@@ -1,5 +1,6 @@
 const dbUtil = require('../../setup/mongoose');
 const { User } = require("../fixture");
+const { User: UserModel } = require('../../model');
 
 let db;
 
@@ -33,9 +34,9 @@ before(function(){
 beforeEach(function() {
   return db.dropDatabase().then(() => {
     return rebuildAllIndexes(db);
-    //return db.model('User').createIndexes();
+    //return UserModel.createIndexes();
   }).then(() => {
-    return db.model('User').insertMany(User);
+    return UserModel.insertMany(User);
   });
 });
 
@@ -56,7 +57,7 @@ describe('Bootstrap mongodb', function() {
     newUserFixture.should.deep.equal(User);
   });
   it('should populate db with fixture data', function() {
-    return db.model('User').countDocuments().exec().then((total) => {
+    return UserModel.countDocuments().exec().then((total) => {
       expect(total > 0).to.be.true;
     })
   });

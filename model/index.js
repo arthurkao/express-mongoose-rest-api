@@ -1,20 +1,13 @@
 /**
  * ORM layer:
  *
- * Model (a mongoose abstraction to interact with mongo doc) of each underlying mongo collections are defined in
- * respective ./{collectionName}.js files. A model is composed by one or a few mongoose Schema defined in ./schema/*.js
+ * Model (a mongoose abstraction to interact with mongo doc) of each underlying mongo collections are defined here.
+ * A model is composed by one or a few mongoose Schema defined in ./schema/*.js and is selectively exposed here.
+ * e.g. "base" models upon which a few mongoose discriminator defined are not made public.
  *
- * Services should use these exposed models to interact with mongodb.
+ * Services should use models exported here to interact with mongodb.
  */
-let obj = {};
-require('fs').readdirSync(__dirname).forEach((file) => {
-  const filePath = __dirname + '/' + file;
-  let property;
-
-  // exclude this index.js file and include other *.js files
-  if(filePath.indexOf('index') === -1 && filePath.indexOf('.js') !== -1){
-    property = file.charAt(0).toUpperCase() + file.substring(1, file.length-3);
-    obj[property] = require(filePath);
-  }
-});
-module.exports = obj;
+const UserModel = require('./user');
+module.exports = {
+  User: UserModel
+};

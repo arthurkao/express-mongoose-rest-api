@@ -1,6 +1,7 @@
 const request = require('supertest');
 const db = require('mongoose');
 const app = require('../../../setup/express');
+const { User: UserModel } = require('../../../model');
 
 const mount = '/api/user';
 // this user exists in test fixutre data
@@ -100,7 +101,7 @@ describe('/api/user routes', function() {
   describe('GET /user/:id', function() {
     let validId;
     beforeEach(function(){
-      return db.model('User').findOne({}).exec().then((user) => {
+      return UserModel.findOne({}).exec().then((user) => {
         validId = user.get('id');
       });
     });
@@ -209,7 +210,7 @@ describe('/api/user routes', function() {
         password: 'updatedpassword',
         email: 'updated@gmail.com'
       };
-      return db.model('User').findOne({ username: { $ne: 'testusername' }}).exec()
+      return UserModel.findOne({ username: { $ne: 'testusername' }}).exec()
         .then((user) => {
           existUserId = user.get('id');
           existUser = user.toObject();
@@ -236,7 +237,7 @@ describe('/api/user routes', function() {
         .end(function(err, res) {
           expect(err).is.null;
           // check db to see the user was in fact updated
-          db.model('User').findById(existUserId).lean().exec()
+          UserModel.findById(existUserId).lean().exec()
             .then((user) => {
               user.username.should.exist;
               user.email.should.exist;
@@ -283,7 +284,7 @@ describe('/api/user routes', function() {
     describe('in case of key collision', function() {
       let duplicateUser;
       beforeEach(function() {
-        return db.model('User').findOne({ username: 'testusername' }).lean().exec()
+        return UserModel.findOne({ username: 'testusername' }).lean().exec()
           .then((user) => (duplicateUser = user));
       });
       it('should not update user if intended username is taken and respond with 500 code', function(done) {
@@ -311,7 +312,7 @@ describe('/api/user routes', function() {
   describe('DELETE /user/:id', function() {
     let id, token;
     beforeEach(function() {
-      return db.model('User').findOne({}).exec()
+      return UserModel.findOne({}).exec()
         .then((user) => {
           id = user.get('id');
         })
@@ -336,9 +337,9 @@ describe('/api/user routes', function() {
         .set('Authorization', 'bearer ' + token)
         .expect(204)
         .end(function() {
-           db.model('User').findById(id, (user) => {
+           UserModel.findById(id, (user) => {
              expect(user).is.null;
-             db.model('User').countDocuments((err, total) => {
+             UserModel.countDocuments((err, total) => {
                // assert that the user given id is indeed removed from db
                expect(total).to.equal(require('../../fixture/user').length - 1);
                done();
@@ -365,9 +366,9 @@ describe('/api/user routes', function() {
         .set('Authorization', 'bearer ' + token)
         .expect(204)
         .end(function() {
-          db.model('User').findById(id, (user) => {
+          UserModel.findById(id, (user) => {
             expect(user).is.null;
-            db.model('User').countDocuments((err, total) => {
+            UserModel.countDocuments((err, total) => {
               // assert that the total number of user in db is unchanged.
               expect(total).to.equal(require('../../fixture/user').length);
               done();
