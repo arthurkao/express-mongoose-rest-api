@@ -85,13 +85,18 @@ function wrap(ctrFn) {
  *         example: 10
  *     responses:
  *       200:
- *         description: array of users
+ *         description: Object containing array of users and number of users satisfying query
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: number
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#components/schemas/User'
  *       5XX:
  *         $ref: '#components/responses/InternalServerError'
  *   post:

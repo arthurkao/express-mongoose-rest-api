@@ -3,7 +3,7 @@ const debug = _debug('controller:user');
 const Boom = require('boom');
 const Joi = require('joi');
 
-const { filterObjByKeys, isMongoId, ra } = require('../util');
+const { filterObjByKeys, isMongoId } = require('../util');
 const { UserService } = require('../service');
 
 const createUserJSONSchema = Joi.object().keys({
@@ -37,15 +37,7 @@ module.exports = {
     const opt = filterObjByKeys(req.query, allowed);
     return UserService.getUsers(opt)
       .then((r) => {
-        const users = r.data;
-        const range = opt.range;
-
-        // add 'Content-Range' header so clients handle pagination properly.
-        if (!!range && Array.isArray(range) && range.length === 2) {
-          const { start, end, total } = ra.calculateContentRange(opt.range[0], opt.range[1], r.total);
-          res.set('Content-Range', 'user ' + start + '-' + end + '/' + total);
-        }
-        return res.json(users);
+        return res.json({ users: r.data, total: r.total });
       }, (err) => {
         throw Boom.internal('Error when finding users', err);
       });

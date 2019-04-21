@@ -11,14 +11,9 @@ const Boom = require('boom');
 const debug = _debug('setup:express');
 const route = require('../route');
 const parseReqQueryObject = require('../route/middleware/parseReqQuery');
-const transformRASimpleRest = require('../route/middleware/transformRASimpleRest');
 
 // grab a "clean" express app
 const app = express();
-
-const corsOpts = {
-  exposedHeaders: ['Content-Range']  //for ra-simple-rest api client
-};
 
 const setupMorgan = (app, env = 'dev') => {
   const logErrorToStderr = morgan('dev', {
@@ -81,13 +76,10 @@ function middlewares(app) {
   app.use(helmet());
 
   // enable CORS - Cross Origin Resource Sharing
-  app.use(cors(corsOpts));
+  app.use(cors());
 
   // JSON.parse req.query
   app.use(parseReqQueryObject);
-
-  // client specific middleware
-  app.use(transformRASimpleRest);
 
 }
 

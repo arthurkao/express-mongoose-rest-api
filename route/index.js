@@ -10,7 +10,8 @@ const router = express.Router();
  */
 function forceJsonContentType (req, res, next) {
   const contentType = req.headers['content-type'];
-  return contentType != 'application/json'?
+  // content-type might contain other strings i.e. charset: UTF-8
+  return contentType.indexOf('application/json') < 0?
     next(Boom.unsupportedMediaType("Expect application/json")): next();
 }
 

@@ -23,7 +23,6 @@ module.exports = {
   isMongoId: (id) => {
     const checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
     return !!id && checkForHexRegExp.test(id);
-  },
-  ra: require('./ra-simple-rest')
+  }
 };
 

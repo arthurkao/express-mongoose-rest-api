@@ -40,11 +40,13 @@ describe('/api/user routes', function() {
         .get(url)
         .set('Content-Type', 'application/json')
         .expect(function(res) {
-          const users = res.body;
+          const users = res.body.users;
+          const total = res.body.total;
           users.should.exist;
           users.should.be.a('array');
           userFixture.should.have.members(users.map((user) => (user.username)));
           users[0].should.not.have.key('password');
+          total.should.equal(userFixture.length)
           //test if resources returns matches what's stored in db
         })
         .expect(200, done);
@@ -53,28 +55,27 @@ describe('/api/user routes', function() {
       url = mount;
       const userFixture = require('../../fixture/user')
         .map((user) => (user.username));
-      const start = 2, end = 11;
+      const skip = 15, limit = 10;
       request(app)
         .get(url)
-        .query({range: [start, end]})
+        .query({ skip, limit })
         .set('Content-Type', 'application/json')
         .expect(function (res){
-          const users = res.body.map((user) => (user.username));
-          users.should.have.length(end - start + 1);
+          const users = res.body.users.map((user) => (user.username));
+          users.should.have.length(limit);
           userFixture.should.include.members(users);
           //test if resource returned is a subset of what's stored in db
         })
-        .expect('Content-Range', /^user \d+-\d+\/\d+$/)
         .expect(200, done);
     });
     it('should handle sort query', function(done) {
       url = mount;
       request(app)
         .get(url)
-        .query({ sort: ['username', 'DESC'] })
+        .query({ sort: { 'username': 'DESC' } })
         .set('Content-Type', 'application/json')
         .expect(function (res){
-          const users = res.body.map((user) => (user.username));
+          const users = res.body.users.map((user) => (user.username));
           users.should.be.sorted({descending: true});
           //test if resource returned is sorted correctly
         })
@@ -88,10 +89,10 @@ describe('/api/user routes', function() {
         .filter((username) => (new RegExp(querystr).test(username)));
       request(app)
         .get(url)
-        .query({ filter: { q: querystr } })
+        .query({ filter: querystr })
         .set('Content-Type', 'application/json')
         .expect(function (res){
-          const users = res.body;
+          const users = res.body.users;
           users.should.be.a('array');
           users.should.have.length(userFixture.length);
         })

@@ -11,10 +11,8 @@ const USER_PASSWORD_NOT_MATCH = 'USER_PASSWORD_NOT_MATCH';
 
 function buildGetUsersQuery({filter, sort, skip, limit}, count=false) {
   let query = User.find();
-  if(filter && !!filter.q){
-    // filter.q is the query string to match any part inside username
-    //debug('filter: ', filter);
-    query = query.where('username', { $regex: filter.q });
+  if(filter){
+    query = query.where('username', { $regex: filter });
   }
   if(count) {
     return query;
@@ -23,10 +21,10 @@ function buildGetUsersQuery({filter, sort, skip, limit}, count=false) {
     query = query.sort(sort);
   }
   if(skip){
-    query = query.skip(skip);
+    query = query.skip(Number(skip));
   }
   if(limit){
-    query = query.limit(limit);
+    query = query.limit(Number(limit));
   }
   return query;
 }
