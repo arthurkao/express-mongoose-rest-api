@@ -137,7 +137,7 @@ module.exports = {
       })
       .then((user) => {
         // lastly generate a JWT
-        return user.generateJWT(['username', 'email'], process.env.JWT_TTL);
+        return user.generateJWT(['username', 'id'], process.env.JWT_TTL);
       });
   }
 };
