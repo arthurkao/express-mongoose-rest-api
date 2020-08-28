@@ -29,7 +29,6 @@
     "jsonwebtoken": "^8.3.0",
     "method-override": "^3.0.0",
     "mongoose": "^5.3.8",
-    "mongoose-timestamp": "^0.6.0",
     "morgan": "^1.9.1",
     "swagger-jsdoc": "^3.2.6",
     "swagger-ui-express": "^4.0.1"

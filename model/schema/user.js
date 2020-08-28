@@ -9,6 +9,7 @@ var UserSchema = new mongoose.Schema({
   'password' : { type: String, required: true, select: false },
   'email' : { type: String, unique: true, index: true }
 },{
+  timestamps: true,
   toJSON: { getters: true } // id field is defined in getters (not stored in mongo doc)
 });
 

@@ -1,5 +1,4 @@
 const debug = require('debug')('setup:mongoose');
-const timestamp = require('mongoose-timestamp');
 const mongoose = require('mongoose');
 
 const mongoURI = 'mongodb://' + process.env.DB_HOST + ':' + process.env.DB_PORT;
@@ -33,7 +32,6 @@ const  setup = () => {
     debug('setting up mongoose globals...');
     mongoose.Promise = global.Promise;
     debug('registering global plug-in...');
-    mongoose.plugin(timestamp);
   };
 
 module.exports = {
