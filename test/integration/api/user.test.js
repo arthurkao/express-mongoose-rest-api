@@ -1,6 +1,6 @@
 const request = require('supertest');
 const db = require('mongoose');
-const app = require('../../../setup/express');
+const app = require('../../../setup/express')();
 const { User: UserModel } = require('../../../model');
 
 const mount = '/api/user';

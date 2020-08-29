@@ -12,8 +12,6 @@ const debug = _debug('setup:express');
 const route = require('../route');
 const parseReqQueryObject = require('../route/middleware/parseReqQuery');
 
-// grab a "clean" express app
-const app = express();
 
 const setupMorgan = (app, env = 'dev') => {
   const logErrorToStderr = morgan('dev', {
@@ -121,9 +119,13 @@ function errorHandlers(app) {
     return next(err);
   });
 }
+module.exports = () => {
+  // grab a "clean" express app
+  const app = express();
 
-// inverse of control: pass app into those app-enhancers
-middlewares(app);
-routes(app);
-errorHandlers(app);
-module.exports = app;
+  // inverse of control: pass app into those app-enhancers
+  middlewares(app);
+  routes(app);
+  errorHandlers(app);
+  return app;
+}
