@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "description": "REST API server powered by Express/MongoDB with user authentication via JWT",
   "main": "index.js",
-  "repository": "https://github.com/arthurkao/express-mongoose-rest-api.git",
+  "repository": "https://gitlab.com/arthurkao/express-mongoose-rest-api.git",
   "author": "Arthur C. Kao <arthurckao@gmail.com>",
   "license": "MIT",
   "private": false,
