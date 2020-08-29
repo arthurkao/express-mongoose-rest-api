@@ -24,7 +24,7 @@ module.exports = {
   authenticate: (req, res) => {
     debug('authenticate invoked');
     const userJSON = (({username, password}) => ({username, password}))(req.body);
-    const result = Joi.validate(userJSON, loginJSONSchema);
+    const result = loginJSONSchema.validate(userJSON);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }

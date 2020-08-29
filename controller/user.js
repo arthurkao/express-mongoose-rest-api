@@ -60,7 +60,7 @@ module.exports = {
     const allowed = ['username', 'password', 'email'];
     const userJSON = filterObjByKeys(req.body, allowed);
     debug('create invoked with userJSON: ', userJSON);
-    const result = Joi.validate(userJSON, joiSchema.create);
+    const result = joiSchema.create.validate(userJSON);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }
@@ -89,7 +89,7 @@ module.exports = {
     if(!isMongoId(id)){
       return Promise.reject(Boom.badData('Invalid ID'));
     }
-    const result = Joi.validate(userJSON, joiSchema.update);
+    const result = joiSchema.update.validate(userJSON);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }

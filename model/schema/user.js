@@ -8,13 +8,13 @@ const debug = require('debug')('db:user');
 const createUserJSONSchema = Joi.object().keys({
   username: Joi.string().alphanum().min(3).max(30).trim().required(),
   password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required(),
-  email: Joi.string().email({ minDomainAtoms: 2 })
+  email: Joi.string().email()
 });
 
 const updateUserJSONSchema = Joi.object().keys({
   username: Joi.string().alphanum().min(3).max(30).trim(),
   password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
-  email: Joi.string().email({ minDomainAtoms: 2 })
+  email: Joi.string().email()
 }).min(1);
 
 const joiSchema = { create: createUserJSONSchema, update: updateUserJSONSchema };
