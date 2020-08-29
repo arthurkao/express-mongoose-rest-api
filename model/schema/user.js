@@ -1,8 +1,23 @@
+const Joi = require('joi');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'myJWTsecret';
 const debug = require('debug')('db:user');
+
+const createUserJSONSchema = Joi.object().keys({
+  username: Joi.string().alphanum().min(3).max(30).trim().required(),
+  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required(),
+  email: Joi.string().email({ minDomainAtoms: 2 })
+});
+
+const updateUserJSONSchema = Joi.object().keys({
+  username: Joi.string().alphanum().min(3).max(30).trim(),
+  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+  email: Joi.string().email({ minDomainAtoms: 2 })
+}).min(1);
+
+const joiSchema = { create: createUserJSONSchema, update: updateUserJSONSchema };
 
 var UserSchema = new mongoose.Schema({
   'username' : { type: String, required: true, trim: true, unique: true, index: true  },
@@ -58,4 +73,7 @@ UserSchema.pre('save', function(next) {
   });
 });
 
-module.exports = UserSchema;
+module.exports = {
+  joiSchema,
+  mongooseSchema: UserSchema
+};

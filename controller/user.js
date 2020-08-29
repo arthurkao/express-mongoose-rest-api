@@ -5,18 +5,7 @@ const Joi = require('joi');
 
 const { filterObjByKeys, isMongoId } = require('../util');
 const { UserService } = require('../service');
-
-const createUserJSONSchema = Joi.object().keys({
-  username: Joi.string().alphanum().min(3).max(30).trim().required(),
-  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required(),
-  email: Joi.string().email({ minDomainAtoms: 2 })
-});
-
-const updateUserJSONSchema = Joi.object().keys({
-  username: Joi.string().alphanum().min(3).max(30).trim(),
-  password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
-  email: Joi.string().email({ minDomainAtoms: 2 })
-}).min(1);
+const { joiSchema } = require('../model/schema/user');
 
 /**
  * UserController.js
@@ -71,7 +60,7 @@ module.exports = {
     const allowed = ['username', 'password', 'email'];
     const userJSON = filterObjByKeys(req.body, allowed);
     debug('create invoked with userJSON: ', userJSON);
-    const result = Joi.validate(userJSON, createUserJSONSchema);
+    const result = Joi.validate(userJSON, joiSchema.create);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }
@@ -100,7 +89,7 @@ module.exports = {
     if(!isMongoId(id)){
       return Promise.reject(Boom.badData('Invalid ID'));
     }
-    const result = Joi.validate(userJSON, updateUserJSONSchema);
+    const result = Joi.validate(userJSON, joiSchema.update);
     if(result.error){
       return Promise.reject(Boom.badData(result.error));
     }
