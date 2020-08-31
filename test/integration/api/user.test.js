@@ -1,10 +1,10 @@
 const request = require('supertest');
-const db = require('mongoose');
 const app = require('../../../setup/express')();
 const { User: UserModel } = require('../../../model');
+const { login: loginHelper } = require('../../setup');
 
 const mount = '/api/user';
-// this user exists in test fixutre data
+// this user exists in user test fixture
 const validUser = {
   username: 'testusername',
   password: 'testpassword'
@@ -13,21 +13,11 @@ const validUser = {
 let url;
 
 /**
- * login helper for those routes requiring login
- * resolves a valid token.
- * @returns {Promise|*}
+ * fill in app, uri, user params associating with current test(s)
+ * @returns {Promise<String>}
  */
 function login () {
-  return new Promise(function(resolve, reject) {
-    request(app)
-      .post('/api/login')
-      .send(validUser)
-      .set('Content-Type', 'application/json')
-      .end((err, res) => {
-        if(err || !res.body.token) return reject(err);
-        return resolve(res.body.token)
-      });
-  });
+  return loginHelper(app, '/api/login', validUser);
 }
 
 describe('/api/user routes', function() {
